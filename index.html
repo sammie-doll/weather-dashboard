@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Weather Dashboard</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, #FFF9FA, #FDE2E4);
+      min-height: 100vh;
+      padding: 2rem 1rem;
+    }
+
+    .container {
+      max-width: 460px;
+      margin: auto;
+    }
+
+    h1 {
+      font-size: 1.75rem;
+      color: #2D1B22;
+      margin-bottom: 1.5rem;
+    }
+
+    .search {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .search input {
+      flex: 1;
+      padding: 0.85rem 1rem;
+      border-radius: 14px;
+      border: 1px solid #fce4ec;
+      background: white;
+      outline: none;
+      font-size: 0.9rem;
+      color: #2D1B22;
+    }
+
+    .search input:focus {
+      border-color: #E639AF;
+    }
+
+    .search button {
+      padding: 0 1.25rem;
+      background: #E639AF;
+      color: white;
+      border: none;
+      border-radius: 14px;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: opacity 0.2s;
+    }
+
+    .search button:hover {
+      opacity: 0.85;
+    }
+
+    .error {
+      color: #ef4444;
+      font-size: 0.85rem;
+      margin-bottom: 1rem;
+    }
+
+    .main-card {
+      background: #2D1B22;
+      border-radius: 24px;
+      padding: 1.75rem;
+      color: white;
+      margin-bottom: 1rem;
+    }
+
+    .card-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 1rem;
+    }
+
+    .city-name {
+      font-size: 1.5rem;
+      font-weight: 700;
+    }
+
+    .country {
+      color: #f9a8d4;
+      font-size: 0.8rem;
+      margin-bottom: 0.25rem;
+    }
+
+    .desc {
+      color: #f9a8d4;
+      font-size: 0.875rem;
+      margin-top: 0.25rem;
+    }
+
+    .icon {
+      font-size: 4rem;
+    }
+
+    .temp {
+      font-size: 5rem;
+      font-weight: 200;
+      line-height: 1;
+    }
+
+    .feels {
+      color: #f9a8d4;
+      font-size: 0.875rem;
+      margin-top: 0.5rem;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+    }
+
+    .stat-card {
+      background: white;
+      border: 1px solid #fce4ec;
+      border-radius: 16px;
+      padding: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .stat-icon {
+      font-size: 1.25rem;
+    }
+
+    .stat-label {
+      font-size: 0.7rem;
+      color: #aaa;
+    }
+
+    .stat-val {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #2D1B22;
+    }
+
+    .forecast-card {
+      background: white;
+      border: 1px solid #fce4ec;
+      border-radius: 16px;
+      padding: 1rem 1.25rem;
+    }
+
+    .forecast-title {
+      font-size: 0.7rem;
+      color: #aaa;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 0.75rem;
+    }
+
+    .forecast-row {
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .forecast-day {
+      text-align: center;
+    }
+
+    .forecast-day .day-label {
+      font-size: 0.75rem;
+      color: #aaa;
+    }
+
+    .forecast-day .day-icon {
+      font-size: 1.5rem;
+    }
+
+    .forecast-day .day-high {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #2D1B22;
+    }
+
+    .forecast-day .day-low {
+      font-size: 0.75rem;
+      color: #bbb;
+    }
+
+    .hint {
+      font-size: 0.75rem;
+      color: #bbb;
+      text-align: center;
+      margin-top: 0.75rem;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <h1>Weather Dashboard 🌤️</h1>
+
+    <div class="search">
+      <input type="text" id="queryInput" placeholder="Search city... (e.g. Johannesburg)" />
+      <button onclick="search()">🔍</button>
+    </div>
+    <p class="error" id="error"></p>
+
+    <div class="main-card" id="mainCard"></div>
+    <div class="stats" id="stats"></div>
+    <div class="forecast-card">
+      <p class="forecast-title">5-Day Forecast</p>
+      <div class="forecast-row" id="forecast"></div>
+    </div>
+    <p class="hint">Try: Johannesburg, Cape Town, Durban, London, New York, Tokyo</p>
+  </div>
+
+  <script>
+    const CITIES = {
+      'johannesburg': { city: 'Johannesburg', country: 'ZA', temp: 22, feels: 20, humidity: 45, wind: 18, visibility: 10, desc: 'Partly Cloudy', icon: '⛅' },
+      'cape town': { city: 'Cape Town', country: 'ZA', temp: 18, feels: 16, humidity: 72, wind: 25, visibility: 8, desc: 'Windy', icon: '🌬️' },
+      'durban': { city: 'Durban', country: 'ZA', temp: 27, feels: 30, humidity: 80, wind: 12, visibility: 9, desc: 'Sunny', icon: '☀️' },
+      'london': { city: 'London', country: 'GB', temp: 12, feels: 9, humidity: 85, wind: 20, visibility: 6, desc: 'Overcast', icon: '☁️' },
+      'new york': { city: 'New York', country: 'US', temp: 15, feels: 13, humidity: 60, wind: 22, visibility: 10, desc: 'Clear', icon: '🌤️' },
+      'tokyo': { city: 'Tokyo', country: 'JP', temp: 20, feels: 19, humidity: 65, wind: 10, visibility: 12, desc: 'Sunny', icon: '☀️' },
+      'paris': { city: 'Paris', country: 'FR', temp: 14, feels: 11, humidity: 75, wind: 18, visibility: 7, desc: 'Cloudy', icon: '🌥️' },
+    };
+
+    let current = CITIES['johannesburg'];
+
+    function render(w) {
+      document.getElementById('mainCard').innerHTML = `
+        <div class="card-top">
+          <div><p class="country">${w.country}</p><p class="city-name">${w.city}</p><p class="desc">${w.desc}</p></div>
+          <span class="icon">${w.icon}</span>
+        </div>
+        <p class="temp">${w.temp}°</p>
+        <p class="feels">Feels like ${w.feels}°C</p>
+      `;
+      document.getElementById('stats').innerHTML = [
+        { icon: '💧', label: 'Humidity', val: `${w.humidity}%` },
+        { icon: '💨', label: 'Wind', val: `${w.wind} km/h` },
+        { icon: '👁️', label: 'Visibility', val: `${w.visibility} km` },
+        { icon: '🌡️', label: 'Feels Like', val: `${w.feels}°C` },
+      ].map(s => `
+        <div class="stat-card">
+          <span class="stat-icon">${s.icon}</span>
+          <div><p class="stat-label">${s.label}</p><p class="stat-val">${s.val}</p></div>
+        </div>
+      `).join('');
+      const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
+      const icons = ['☀️', '⛅', '🌧️', '☀️', '⛅'];
+      document.getElementById('forecast').innerHTML = days.map((d, i) => `
+        <div class="forecast-day">
+          <p class="day-label">${d}</p>
+          <p class="day-icon">${icons[i]}</p>
+          <p class="day-high">${w.temp + (i % 2 === 0 ? 2 : -1)}°</p>
+          <p class="day-low">${w.temp - 5}°</p>
+        </div>
+      `).join('');
+    }
+
+    function search() {
+      const key = document.getElementById('queryInput').value.toLowerCase().trim();
+      document.getElementById('error').textContent = '';
+      if (CITIES[key]) {
+        current = CITIES[key];
+        render(current);
+      } else {
+        document.getElementById('error').textContent = 'City not found. Try: Johannesburg, Cape Town, London, New York, Tokyo';
+      }
+    }
+
+    document.getElementById('queryInput').addEventListener('keydown', e => {
+      if (e.key === 'Enter') search();
+    });
+
+    render(current);
+  </script>
+</body>
+
+</html>
